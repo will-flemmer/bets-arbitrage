@@ -8,12 +8,16 @@
 			<h1>Bet Finder</h1>
 			<h2>Message: {{.Message}}</h2>
       <button onclick="refreshBets()">Refresh Bets Data</button>
-      <button onclick="findArbitrageOpportunities()">Refresh Bets Data</button>
+      <p id="refreshMessage"></p>
+      <p id="refreshErr"></p>
+      <button onclick="findArbitrageOpportunities()">Do analysis</button>
 	</body>
 	<script type="text/javascript">
     async function refreshBets() {
       const res = await(await fetch('http://localhost:8080/refresh-bets')).json()
       console.log(res)
+      document.getElementById("refreshMessage").textContent = res.Message
+      document.getElementById("refreshErr").textContent = res.Err
     }
     function findArbitrageOpportunities() {
       fetch('http://localhost:8080/run-analysis')

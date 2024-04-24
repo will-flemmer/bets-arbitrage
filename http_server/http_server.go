@@ -34,10 +34,9 @@ type Response struct {
 }
 
 func refreshBetData(w http.ResponseWriter, req *http.Request) {
-	err := wrangling.FetchAndStoreData()
-	
 	w.Header().Set("Content-Type", "application/json")
-
+	
+	err := wrangling.FetchAndStoreData()
 	if err != nil {
 		json.NewEncoder(w).Encode(Response{ Err: err.Error() })
 	}
