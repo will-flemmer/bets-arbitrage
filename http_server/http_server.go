@@ -39,20 +39,10 @@ func refreshBetData(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
-		println(err.Error())
-		payload, err := json.Marshal(Response{ Err: err.Error() }) 
-		if err != nil {
-			panic(err)
-		}
-		json.NewEncoder(w).Encode(payload)
+		json.NewEncoder(w).Encode(Response{ Err: err.Error() })
 	}
 
-	payload, err := json.Marshal(Response{ Message: "Data has been refreshed"})
-	if err != nil {
-		panic(err)
-	}
-
-	json.NewEncoder(w).Encode(payload)
+	json.NewEncoder(w).Encode(Response{ Message: "Data has been refreshed"})
 }
 
 func StartHttpServer() {
