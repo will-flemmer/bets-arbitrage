@@ -1,35 +1,5 @@
 package wrangling
 
-
-type Outcome struct {
-	Name  string  `json:"name"`
-	Price float32 `json:"price"`
-}
-
-type Market struct {
-	Key        string    `json:"key"`
-	LastUpdate string    `json:"last_update"`
-	Outcomes   []Outcome `json:"outcomes"`
-}
-
-type Bookmaker struct {
-	Key        string   `json:"key"`
-	LastUpdate string   `json:"last_update"`
-	Markets    []Market `json:"markets"`
-	Title      string   `json:"title"`
-}
-
-type Fixture struct {
-	AwayTeam   string      `json:"away_team"`
-	Bookmakers []Bookmaker `json:"bookmakers"`
-}
-
-type BestOdds struct {
-	TeamName      string
-	Odds          float32
-	BookmakerName string
-}
-
 // find best odds for each outcome accross all bookmakers
 // will retun a slice which has 3 BestOdds structs, one for each outcome
 func GetBestOdds(fixture Fixture, marketKey string) []BestOdds {

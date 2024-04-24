@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"scraping/bets"
+	httpServer "scraping/http_server"
 	"scraping/utils"
 )
 
@@ -10,11 +11,18 @@ import (
 // /v4/sports/{sport}/odds/?apiKey={apiKey}&regions={regions}&markets={markets}&oddsFormat={oddsFormat}&commenceTimeFrom={commenceTimeFrom}&commenceTimeTo={commenceTimeTo}
 
 func main() {
-	env := utils.LoadEnv()
-	fmt.Printf("%+v", env)
-	apiToken := env.API_TOKEN
+	// apiToken := env.API_TOKEN
 	// bets.GetSports(apiToken)
-	getBets(apiToken)
+	// getBets(apiToken)
+
+	// wrangling.FetchAndStoreData()
+	startHttpServer()
+}
+
+func startHttpServer() {
+	go httpServer.StartHttpServer()
+	var out string
+	fmt.Scanln(&out)
 }
 
 func getBets(apiToken string) {

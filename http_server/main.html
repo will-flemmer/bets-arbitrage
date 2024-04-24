@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+			<meta charset="UTF-8">
+			<title>Arbitrage The Odds</title>
+	</head>
+	<body>
+			<h1>Bet Finder</h1>
+			<h2>Message: {{.Message}}</h2>
+      <button onclick="refreshBets()">Refresh Bets Data</button>
+      <button onclick="findArbitrageOpportunities()">Refresh Bets Data</button>
+	</body>
+	<script type="text/javascript">
+    async function refreshBets() {
+      const res = await(await fetch('http://localhost:8080/refresh-bets')).json()
+      console.log(res)
+    }
+    function findArbitrageOpportunities() {
+      fetch('http://localhost:8080/run-analysis')
+    }
+  </script>
+</html>

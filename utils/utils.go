@@ -3,7 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -28,19 +28,8 @@ func GetJson[T any](url string, target *[]T) error {
 	fmt.Println("Used", used, "requests")
 	fmt.Println(remaining, "reamaining requests")
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	return json.Unmarshal(body, target)
 }
 
-func CheckRemainingRequests(apiToken string) {
-	endpoint := fmt.Sprintf("https://api.the-odds-api.com/v4/sports/?apiKey=%s", apiToken)
-	r, err := http.Get(endpoint)
-	if err != nil {
-		panic(err)
-	}
-	used := r.Header.Get("x-requests-used")
-	remaining := r.Header.Get("x-requests-remaining")
-	fmt.Println("Used", used, "requests")
-	fmt.Println(remaining, "reamaining requests")
-}
 
