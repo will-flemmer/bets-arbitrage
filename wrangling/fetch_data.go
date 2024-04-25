@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	regions = "uk"
-	markets = "h2h"
+	REGIONS = "uk"
+	MARKETS = "h2h"
 )
 
 func FetchAndStoreData() error {
@@ -16,10 +16,8 @@ func FetchAndStoreData() error {
 		return err
 	}
 
-	firstFixtures := fixtures[:2]
-
 	dbHandle := LoadDb()
-	for _, fixture := range firstFixtures {
+	for _, fixture := range fixtures {
 		res := dbHandle.Create(&fixture)
 		fmt.Printf("%+v", res.Error)
 	}
@@ -30,13 +28,24 @@ func FetchAndStoreData() error {
 func fetchFixtures() ([]Fixture, error) {
 	apiToken := utils.LoadEnv().API_TOKEN
 	println(apiToken)
-	sportKey := "soccer_austria_bundesliga"
-	endpoint := fmt.Sprintf("https://api.the-odds-api.com/v4/sports/%s/odds/?apiKey=%s&regions=%s&markets=%s", sportKey, apiToken, regions, markets)
-
+	sports := utils.LoadSports()
+	
 	var fixtures []Fixture
-	err := utils.GetJson(endpoint, &fixtures)
-	// println(err.Error())
-	// var err error
+	
+	var err error	
+	for _, sportKey := range sports.Soccer {
+		endpoint := fmt.Sprintf(
+			"https://api.the-odds-api.com/v4/sports/%s/odds/?apiKey=%s&regions=%s&markets=%s",
+			sportKey,
+			apiToken,
+			REGIONS,
+			MARKETS,
+		)
+		
+		var f []Fixture
+		err = utils.GetJson(endpoint, &f)
+		fixtures = append(fixtures, f...)
+	}
 
 	return fixtures, err
 }

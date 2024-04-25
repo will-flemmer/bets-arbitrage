@@ -3,8 +3,8 @@ package bets
 import (
 	"errors"
 	"fmt"
-	"scraping/utils"
 	"scraping/wrangling"
+	"time"
 )
 
 // example cases
@@ -48,28 +48,73 @@ import (
 // Find how much to bet on each outcome to maximise profit
 //
 
-func FindBets(sportKey string, apiToken string) {
+type ProfitableBet struct {
+	FixtureName string `json:"fixtureName"`
+	AvgReturnPercentage float32 `json:"avgReturnPercentage"`
+	Outcomes []Bet `json:"outcomes"`
+}
+
+func FindBets() []ProfitableBet {
 	var availableCash float32 = 100
-	regions := "uk"
-	markets := "h2h"
-	endpoint := fmt.Sprintf("https://api.the-odds-api.com/v4/sports/%s/odds/?apiKey=%s&regions=%s&markets=%s", sportKey, apiToken, regions, markets)
 	var fixtures []wrangling.Fixture
 
 	println("Profitable bets will be printed below:")
-	utils.GetJson(endpoint, &fixtures)
+	dbHandle := wrangling.LoadDb()
+	currentDateTime := time.Now().Format(time.RFC1123)
+
+	dbHandle.Where(
+		"created_at < ?", currentDateTime,
+	).Preload("Bookmakers.Markets.Outcomes").Find(&fixtures)
+
+	// fmt.Printf("%+v", fixtures)
+	var profitableBets []ProfitableBet
 	for _, fixture := range fixtures {
 		if len(fixture.Bookmakers) < 2 {
 			continue
 		}
-		bestOddsForGame := wrangling.GetBestOdds(fixture, markets)
+		bestOddsForGame := wrangling.GetBestOdds(fixture, wrangling.MARKETS)
+		// wrangling.GetBestOdds(fixture, wrangling.MARKETS)
 		bets, err := calculateBets(&bestOddsForGame, availableCash)
-
+		fmt.Printf("%+v\n", bets)
+		
 		if err != nil {
+			println(err.Error())
 			continue
 		}
-		prettyPrintProfitableBet(&bets, availableCash)
+		profitableBets = append(profitableBets, createProfitableBet(&fixture, bets))
+		
+		// prettyPrintProfitableBet(&bets, availableCash)
 	}
+	
+	fmt.Printf("\n%+v\n", profitableBets)
+	return profitableBets
 }
+
+func createProfitableBet(fixture *wrangling.Fixture, bets []Bet) ProfitableBet {
+	return ProfitableBet{
+		FixtureName: fmt.Sprintf("Away Team = %s", fixture.AwayTeam),
+		AvgReturnPercentage: calcAvgReturn(&bets),
+		Outcomes: bets,
+	}
+
+}
+
+// func AnalyseFixtures(fixtures *[]wrangling.Fixture, availableCash float32) ProfitableBet {
+// 	for _, fixture := range *fixtures {
+// 		if len(fixture.Bookmakers) < 2 {
+// 			continue
+// 		}
+// 		bestOddsForGame := wrangling.GetBestOdds(fixture, wrangling.MARKETS)
+// 		bets, err := calculateBets(&bestOddsForGame, availableCash)
+
+// 		if err != nil {
+// 			continue
+// 		}
+// 		prettyPrintProfitableBet(&bets, availableCash)
+// 		profitableBets = append(profitableBets, bets)
+// 	}
+// 	return profitableBets
+// }
 
 func prettyPrintProfitableBet(bets *[]Bet, cashInput float32) {
 	avgReturn := calcAvgReturn(bets)
@@ -82,18 +127,17 @@ func prettyPrintProfitableBet(bets *[]Bet, cashInput float32) {
 func calcAvgReturn(bets *[]Bet) float32 {
 	var sum float32 = 0
 	for _, bet := range *bets {
-		sum = sum + bet.cashReturn
+		sum = sum + bet.CashReturn
 	}
-	return float32(sum) / float32(len(*bets))
+	return float32(sum) / float32(len(*bets)) 
 }
 
 type Bet struct {
-	team           string
-	odds           float32
-	oddsUnits 		 float32
-	cashInvestment float32 // this needs to be rounded to nearest whole number
-	bookmaker      string
-	cashReturn		 float32
+	Team           string `json:"team"`
+	Odds           float32 `json:"odds"`
+	CashInvestment float32 `json:"cashIn"` // this needs to be rounded to nearest whole number
+	Bookmaker      string `json:"bookmaker"`
+	CashReturn		 float32 `json:"cashReturn"`
 }
 
 // Need to round to nearest whole number when calculating cash to invest
@@ -101,6 +145,7 @@ func calculateBets(outcomesPointer *[]wrangling.BestOdds, cashAvailable float32)
 	totalOdds := calcTotalOdds(outcomesPointer)
 	normalizedTotalOdds := normalizedTotalOdds(totalOdds, outcomesPointer)
 	bets := calcCashSplit(totalOdds, normalizedTotalOdds, outcomesPointer, cashAvailable)
+	fmt.Printf("%+v", bets)
 	if isProfitable(bets, cashAvailable) {
 		return bets, nil
 	}
@@ -114,13 +159,13 @@ func calcCashSplit(totalOdds float32, normalizedTotalOdds float32, outcomesPoint
 		oddUnits := totalOdds / outcome.Odds
 
 		cashInvestment := oddUnits * cashPerOdd
-		cashReturn := cashInvestment * outcome.Odds
+		CashReturn := cashInvestment * outcome.Odds
 		bet := Bet{
-			team: outcome.TeamName,
-			odds: outcome.Odds,
-			cashInvestment: cashInvestment, // this needs to be rounded to nearest whole number
-			bookmaker: outcome.BookmakerName,
-			cashReturn: cashReturn }
+			Team: outcome.TeamName,
+			Odds: outcome.Odds,
+			CashInvestment: cashInvestment, // this needs to be rounded to nearest whole number
+			Bookmaker: outcome.BookmakerName,
+			CashReturn: CashReturn }
 		bets = append(bets, bet)
 	}
 	return bets
@@ -141,7 +186,7 @@ func normalizedTotalOdds(totalOdds float32, outcomesPointer *[]wrangling.BestOdd
 
 func isProfitable(allBets []Bet, cashInput float32) bool {
 	for _, bet := range allBets {
-		if bet.cashReturn <= cashInput {
+		if bet.CashReturn <= cashInput {
 			return false
 		}
 	}

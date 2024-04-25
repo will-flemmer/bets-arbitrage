@@ -2,6 +2,7 @@ package wrangling
 
 import (
 	"log"
+	"time"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -36,6 +37,7 @@ type Bookmaker struct {
 
 type Fixture struct {
 	ID uint `json:"-"`
+	CreatedAt time.Time `json:"-"`
 	AwayTeam string `json:"away_team" gorm:"uniqueIndex"`
 	Bookmakers []Bookmaker `json:"bookmakers" gorm:"foreignKey:FixtureID"`
 }
