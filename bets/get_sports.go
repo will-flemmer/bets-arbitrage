@@ -11,12 +11,11 @@ func GetSports(args ...string) {
 	endpoint := fmt.Sprintf("https://api.the-odds-api.com/v4/sports/?apiKey=%s", apiToken)
 
 	var sports []utils.Sport
-	// [utils.Sport] is a generic type
-	utils.GetJson[utils.Sport](endpoint, &sports)
+	utils.GetJson(endpoint, &sports)
 	var sportKeys []string
 
 	for _, element := range sports {
-		if element.Active == true {
+		if element.Active {
 			sportKeys = append(sportKeys, element.Key)
 		}
 	}

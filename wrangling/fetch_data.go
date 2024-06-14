@@ -49,7 +49,3 @@ func fetchFixtures() ([]Fixture, error) {
 
 	return fixtures, err
 }
-
-
-// https://api.the-odds-api.com/v4/sports/soccer_austria_bundesliga/odds/?apiKey=df39f2db5672e910241a1776437ca1f1&regions=uk&markets=h2h
-// df39f2db5672e910241a1776437ca1f1

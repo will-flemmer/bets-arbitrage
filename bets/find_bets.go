@@ -99,31 +99,6 @@ func createProfitableBet(fixture *wrangling.Fixture, bets []Bet) ProfitableBet {
 
 }
 
-// func AnalyseFixtures(fixtures *[]wrangling.Fixture, availableCash float32) ProfitableBet {
-// 	for _, fixture := range *fixtures {
-// 		if len(fixture.Bookmakers) < 2 {
-// 			continue
-// 		}
-// 		bestOddsForGame := wrangling.GetBestOdds(fixture, wrangling.MARKETS)
-// 		bets, err := calculateBets(&bestOddsForGame, availableCash)
-
-// 		if err != nil {
-// 			continue
-// 		}
-// 		prettyPrintProfitableBet(&bets, availableCash)
-// 		profitableBets = append(profitableBets, bets)
-// 	}
-// 	return profitableBets
-// }
-
-func prettyPrintProfitableBet(bets *[]Bet, cashInput float32) {
-	avgReturn := calcAvgReturn(bets)
-	percentageReturn := 100 * (avgReturn - cashInput) / cashInput
-
-	fmt.Println("Bet is Profitable!")
-	fmt.Println("With a cash input of", cashInput, "you will get a return of", avgReturn, "----", percentageReturn, "%")
-}
-
 func calcAvgReturn(bets *[]Bet) float32 {
 	var sum float32 = 0
 	for _, bet := range *bets {
@@ -169,11 +144,6 @@ func calcCashSplit(totalOdds float32, normalizedTotalOdds float32, outcomesPoint
 		bets = append(bets, bet)
 	}
 	return bets
-}
-
-func oddsToCash(totalOdds float32, cashAvailable float32, outcomeOdds float32) float32 {
-	cashPerOddPoint := cashAvailable / totalOdds
-	return outcomeOdds * cashPerOddPoint
 }
 
 func normalizedTotalOdds(totalOdds float32, outcomesPointer *[]wrangling.BestOdds) float32 {
