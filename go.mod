@@ -3,6 +3,7 @@ module scraping
 go 1.20
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/graphql-go/graphql v0.8.1
 	github.com/graphql-go/handler v0.2.4
 	gopkg.in/yaml.v2 v2.4.0

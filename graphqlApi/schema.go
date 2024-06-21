@@ -4,21 +4,13 @@ import (
 	"log"
 
 	"github.com/graphql-go/graphql"
+	"gorm.io/gorm"
 )
 
 
-var	fields = graphql.Fields{
-		"hello": &graphql.Field{
-			Type: graphql.String,
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return "world", nil
-			},
-		},
-	}
-var rootQuery = graphql.ObjectConfig{Name: "RootQuery", Fields: fields}
-var	schemaConfig = graphql.SchemaConfig{Query: graphql.NewObject(rootQuery)}
-
-func CreateSchema() graphql.Schema {
+func CreateSchema(db *gorm.DB) graphql.Schema {
+	queryType := CreateQueryType(db)
+	schemaConfig := graphql.SchemaConfig{Query: queryType}
 	schema, err := graphql.NewSchema(schemaConfig)
 	if err != nil {
 		log.Fatalf("failed to create new schema, error: %v", err)

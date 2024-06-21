@@ -43,9 +43,9 @@ type Fixture struct {
 }
 
 type BestOdds struct {
-	TeamName      string
-	Odds          float32
-	BookmakerName string
+	TeamName      string `json:"teamName"`
+	Odds          float32 `json:"odds"`
+	BookmakerName string `json:"bookmakerName"`
 }
 
 const (

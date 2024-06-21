@@ -6,7 +6,7 @@
 ```yaml
 API_TOKEN: <your api token>
 ```
-3. `go run .`
+3. `air` - for live reloading in the app or `go run .`
 
 ## System Functionality
 1. From the UI I can refresh odds data by pressing a button. The data is then stored in a DB
@@ -16,7 +16,6 @@ API_TOKEN: <your api token>
 
 ## DB Tables
 system: last_refreshed_at
-
 
 
 # Sport Keys

@@ -62,14 +62,12 @@ func runAnalysis(w http.ResponseWriter, _ *http.Request, dbHandle *gorm.DB) {
 	json.NewEncoder(w).Encode(AnalysisResponse{ ProfitableBets: profitableBets })
 }
 
-func generateGraphqlShema(w http.ResponseWriter, _ *http.Request) {
+func generateGraphqlShema(w http.ResponseWriter, _ *http.Request, db *gorm.DB) {
 	w.Header().Set("Content-Type", "application/json")
 	
-	introspection := graphqlApi.GenerateSchema()
+	introspection := graphqlApi.GenerateSchema(db)
 	json.NewEncoder(w).Encode(introspection)
 }
-
-
 
 func StartHttpServer() {
 	fmt.Println("Starting http server")
@@ -82,8 +80,10 @@ func StartHttpServer() {
 		runAnalysis(w, req, dbHandle)
 	})
 	
-	mux.HandleFunc("/generate-schema", generateGraphqlShema)
-	schema := graphqlApi.CreateSchema()
+	mux.HandleFunc("/generate-schema",  func (w http.ResponseWriter, req *http.Request) {
+		generateGraphqlShema(w, req, dbHandle)
+	})
+	schema := graphqlApi.CreateSchema(dbHandle)
 	graphqlHandle := handler.New(&handler.Config{
 		Schema: &schema,
 		Pretty: true,
@@ -91,6 +91,7 @@ func StartHttpServer() {
 	})
 	mux.Handle("/graphql", graphqlHandle)
 
-	newMux := UseCorsMiddleWare(mux)
-	http.ListenAndServe(":8080", newMux)
+	// must enable when using with react
+	// newMux := UseCorsMiddleWare(mux)
+	http.ListenAndServe(":8080", mux)
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	httpServer "scraping/http_server"
 )
 
@@ -18,7 +17,5 @@ func main() {
 }
 
 func startHttpServer() {
-	go httpServer.StartHttpServer()
-	var out string
-	fmt.Scanln(&out)
+	httpServer.StartHttpServer()
 }

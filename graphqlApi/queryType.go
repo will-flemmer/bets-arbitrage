@@ -1,19 +1,38 @@
 package graphqlApi
 
 import (
+	"scraping/graphqlApi/types"
+	"scraping/wrangling"
+
 	"github.com/graphql-go/graphql"
+	"gorm.io/gorm"
 )
 
-var QueryType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "Query",
-	Fields: graphql.Fields{
-			"latestPost": &graphql.Field{
-					Type: graphql.String,
-					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-							return "Hello World!", nil
-					},
-			},
-	},
-})
+func buildAllFixtures(db *gorm.DB) *graphql.Field {
+	fixturesArgs := graphql.FieldConfigArgument{
+		"limit": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.Int),
+		},
+	}
 
-var QueryTypeConfig = graphql.ObjectConfig{Name: "RootQuery", Fields: QueryType}
+	return &graphql.Field{
+		Type: graphql.NewList(types.FixtureType),
+		Args: fixturesArgs,
+		Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+			limit, _ := params.Args["limit"].(int)
+
+			var fixtures []wrangling.Fixture
+			db.Limit(limit).Find(&fixtures)
+			return fixtures, nil
+		},
+	}
+}
+
+func CreateQueryType(db *gorm.DB) *graphql.Object {
+	return graphql.NewObject(graphql.ObjectConfig{
+		Name: "Query",
+		Fields: graphql.Fields{
+			"allfixtures": buildAllFixtures(db),
+		},
+	})
+}
