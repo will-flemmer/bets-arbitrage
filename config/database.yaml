@@ -1,0 +1,11 @@
+development:
+  database: go_bets_development
+  host: localhost
+  username: go_bets_development_username
+  password: go_bets_development_password
+
+test:
+  database: go_bets_test
+  host: localhost
+  username: go_bets_test_username
+  password: go_bets_test_password

@@ -5,13 +5,12 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/testutil"
-	"gorm.io/gorm"
 )
 
-func GenerateSchema(db *gorm.DB) interface{} {
+func GenerateSchema() interface{} {
 	log.Println("Generating schema")
 	result := graphql.Do(graphql.Params{
-			Schema:        CreateSchema(db),
+			Schema:        CreateSchema(),
 			RequestString: testutil.IntrospectionQuery,
 	})
 	return result.Data

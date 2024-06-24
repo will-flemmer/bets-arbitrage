@@ -1,13 +1,17 @@
 package httpServer
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type CorsMiddleware struct {
 	handler http.Handler
 }
 
 func (cm CorsMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	if r.Method == "POST" {
+		w.Header().Set("Content-Type", "application/json")
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "*")

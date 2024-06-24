@@ -5,10 +5,9 @@ import (
 	"scraping/wrangling"
 
 	"github.com/graphql-go/graphql"
-	"gorm.io/gorm"
 )
 
-func buildAllFixtures(db *gorm.DB) *graphql.Field {
+func buildAllFixtures() *graphql.Field {
 	fixturesArgs := graphql.FieldConfigArgument{
 		"limit": &graphql.ArgumentConfig{
 			Type: graphql.NewNonNull(graphql.Int),
@@ -22,17 +21,19 @@ func buildAllFixtures(db *gorm.DB) *graphql.Field {
 			limit, _ := params.Args["limit"].(int)
 
 			var fixtures []wrangling.Fixture
-			db.Limit(limit).Find(&fixtures)
+			wrangling.GlobalDB.Limit(limit).Preload("Bookmakers").Find(&fixtures)
 			return fixtures, nil
 		},
 	}
 }
 
-func CreateQueryType(db *gorm.DB) *graphql.Object {
+func CreateQueryType() *graphql.Object {
 	return graphql.NewObject(graphql.ObjectConfig{
 		Name: "Query",
 		Fields: graphql.Fields{
-			"allfixtures": buildAllFixtures(db),
+			"allfixtures": buildAllFixtures(),
 		},
 	})
 }
+
+

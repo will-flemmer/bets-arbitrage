@@ -4,12 +4,11 @@ import (
 	"log"
 
 	"github.com/graphql-go/graphql"
-	"gorm.io/gorm"
 )
 
 
-func CreateSchema(db *gorm.DB) graphql.Schema {
-	queryType := CreateQueryType(db)
+func CreateSchema() graphql.Schema {
+	queryType := CreateQueryType()
 	schemaConfig := graphql.SchemaConfig{Query: queryType}
 	schema, err := graphql.NewSchema(schemaConfig)
 	if err != nil {

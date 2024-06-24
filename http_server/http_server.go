@@ -10,7 +10,6 @@ import (
 	"scraping/wrangling"
 
 	"github.com/graphql-go/handler"
-	"gorm.io/gorm"
 )
 
 
@@ -55,35 +54,30 @@ func refreshBetData(w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(Response{ Message: "Data has been refreshed"})
 }
 
-func runAnalysis(w http.ResponseWriter, _ *http.Request, dbHandle *gorm.DB) {
+func runAnalysis(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
 	profitableBets := bets.FindBets()
 	json.NewEncoder(w).Encode(AnalysisResponse{ ProfitableBets: profitableBets })
 }
 
-func generateGraphqlShema(w http.ResponseWriter, _ *http.Request, db *gorm.DB) {
+func generateGraphqlShema(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
-	introspection := graphqlApi.GenerateSchema(db)
+	introspection := graphqlApi.GenerateSchema()
 	json.NewEncoder(w).Encode(introspection)
 }
 
 func StartHttpServer() {
 	fmt.Println("Starting http server")
-	dbHandle := wrangling.LoadDb()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", renderHtml)
 	mux.HandleFunc("/refresh-bets", refreshBetData)
-	mux.HandleFunc("/run-analysis", func (w http.ResponseWriter, req *http.Request) {
-		runAnalysis(w, req, dbHandle)
-	})
+	mux.HandleFunc("/run-analysis", runAnalysis)
 	
-	mux.HandleFunc("/generate-schema",  func (w http.ResponseWriter, req *http.Request) {
-		generateGraphqlShema(w, req, dbHandle)
-	})
-	schema := graphqlApi.CreateSchema(dbHandle)
+	mux.HandleFunc("/generate-schema", generateGraphqlShema)
+	schema := graphqlApi.CreateSchema()
 	graphqlHandle := handler.New(&handler.Config{
 		Schema: &schema,
 		Pretty: true,
@@ -92,6 +86,6 @@ func StartHttpServer() {
 	mux.Handle("/graphql", graphqlHandle)
 
 	// must enable when using with react
-	// newMux := UseCorsMiddleWare(mux)
-	http.ListenAndServe(":8080", mux)
+	newMux := UseCorsMiddleWare(mux)
+	http.ListenAndServe(":8080", newMux)
 }

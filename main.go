@@ -1,7 +1,9 @@
 package main
 
 import (
+	"scraping/config"
 	httpServer "scraping/http_server"
+	"scraping/wrangling"
 )
 
 // Odds endpoint - https://the-odds-api.com/liveapi/guides/v4/#parameters-2
@@ -13,6 +15,8 @@ func main() {
 	// getBets(apiToken)
 	// bets.FindBets()
 
+	config.Init()
+	wrangling.LoadDb()
 	startHttpServer()
 }
 
